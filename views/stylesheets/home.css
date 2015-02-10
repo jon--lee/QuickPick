@@ -1,0 +1,44 @@
+body
+{
+	background:white;
+}
+
+#searchBox
+{
+	margin:0px;
+	padding:0px;
+}
+
+#searchBox input[type='text']
+{
+    border:1px solid #E1E1E1;
+    border-top-right-radius:2px;
+    border-top-left-radius:2px;
+	outline:none;
+	width:300px;
+	height: 35px;
+	padding-left:20px;
+	font-size:16px;
+}
+
+#searchBox input[type='text']:focus
+{
+    border:1px solid #FA5858;
+}
+
+#autoBox
+{
+    padding:0px;
+    margin-top:0px;
+    1px solid blue;
+	list-style-type:none;
+}
+
+#autoBox li
+{
+    padding-left:40px;
+    margin:0px;
+    width:283px;
+    border-bottom:1px solid #E1E1E1;
+    display:none;
+}
