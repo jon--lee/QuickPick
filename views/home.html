@@ -7,20 +7,33 @@
 		<script src='/js/jquery-1.11.2.min.js'></script>
 	</head>
 	<body>
-		<div id='searchBox'>
-			<input type='text' id='searchInput' value="{{ q }}" />
-			<button>submit</button>
-			
-			<!-- autoBox roll out! -->
-			<ul id='autoBox'>
-               <li>
-                    asdf
-                </li>
-                <li>
-
-                </li>
+        <div id="container">
+            <div id="header">
+                <div id='logoContainer'>QuickPick</div>
             </div>
-		</div>
+            <div id="content">
+                <div id='searchBox'>
+
+                        <input type='text' id='searchInput' value="{{ q }}" />
+                        <button>submit</button>
+
+                        <!-- autoBox roll out! -->
+                        <ul id='autoBox'>
+
+                        </ul>
+
+                </div>
+            </div>
+            <div id='footer'>
+                <ul>
+                    <li>
+                        Created by Jonathan Lee, 2015
+                    </li>
+
+                </ul>
+		    </div>
+
+        </div>
 	</body>
     <script src='/js/home.js'></script>
 </html>
