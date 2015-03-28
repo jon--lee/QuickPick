@@ -6,6 +6,9 @@ var SEARCH_BOX_ID = "#searchBox";
 var AUTOCOMPLETE_PATH = "/ajax/autocomplete";
 var AUTOBOX_ID = "#autoBox";
 
+var KEY_STRING_COOKIE_NAME = "ks";
+
+var MAX_WIDTH = 300;
 
 //up(1) and down(0) states of keys
 var keyState = 0;
@@ -23,7 +26,7 @@ $('#searchBox input').keydown(function(){
 });
 
 var map;
-var markers = [];
+var points = [];
 /*
 initialization options for google maps
 api for jquery.
@@ -113,6 +116,7 @@ function createNewSelection(listElement)
     updateRecommendations();
     //center the map on lat and long
 
+
     //put marker with details in
 }
 
@@ -137,13 +141,27 @@ function updateRecommendations()
         reference = $(this).attr("data-reference");
         references.push(reference);
     });
+
+    var keyString = readCookie(KEY_STRING_COOKIE_NAME);
+    if(keyString == null)
+    {
+        keyString = "";
+    }
+
     $.ajax({
         type:"post",
         url:"/ajax/recommend/",
         dataType:"json",
-        data: JSON.stringify({"references": references})
-    }).done(function(data){
+        data: JSON.stringify({"references": references, "keyString": keyString})
+    }).done(function(response){
         setAllMap(null);
+        var points = [];
+
+        var keyString = response['keyString'];
+        createCookie(KEY_STRING_COOKIE_NAME, keyString);
+        console.log(keyString);
+
+        var data = response['data'];
         for (var i = 0; i < data.length; i++)
         {
             var place = data[i];
@@ -152,22 +170,44 @@ function updateRecommendations()
             var number = place['number'];
             var address = place['address'];
             var rating = place['rating'];
+            var imageUrl = place['imageUrl'];
 
             var content = "";
-            content += "<h4>" + title
-            content += "<br><span>" + rating + " / 5</span></h4>";
-            content += "<b>Phone number </b>" + number;
+            if(imageUrl != null)
+            {
+                content += "<img src='" + imageUrl + "' style='float:left;margin-top:10px;height:50px;width:50px' />";
+            }
+
+            content += "<h2><span style='font-weight:normal'>" + (i+1) + ".</span> " + title;
+
+            if(rating != null)
+            {
+                content += "<br><span style='font-weight:lighter; font-size:12px'>" + rating + " / 5</span></h4>";
+            }
+            else
+            {
+                content += "<br><br></h4>";
+            }
+
+            if(number != null)
+            {
+                content += "<b>Phone number </b>" + number + "<br />";
+            }
             content += "<br />";
             content += "<b>Address </b>" + address;
 
+
+
             var infowindow = new google.maps.InfoWindow({
-                content: "Holding..."
+                content: "Holding...",
+                maxWidth: MAX_WIDTH
             });
             var marker = new google.maps.Marker({
                 position: location,
                 map: map,
                 title: title
             });
+            infowindow.setContent(content);
             google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
                 return function() {
 
@@ -175,19 +215,28 @@ function updateRecommendations()
                     {
                         currentWindow.close();
                     }
-                    infowindow.setContent(content);
+
                     infowindow.open(map,marker);
                     currentWindow = infowindow;
 
                 };
 
             })(marker,content,infowindow));
-            markers.push(marker);
+
+            point = {
+                'marker': marker,
+                'infowindow': infowindow
+            }
+
+            points.push(point);
 
 
 
         }
-
+        console.log("points: " + points.length);
+        topPoint = points[0];
+        currentWindow = topPoint['infowindow'];
+        currentWindow.open(map,topPoint['marker']);
         autoCenter();
     });
 }
@@ -195,8 +244,8 @@ function updateRecommendations()
 function autoCenter()
 {
     var bounds = new google.maps.LatLngBounds();
-    $.each(markers, function (index, marker) {
-        bounds.extend(marker.position);
+    $.each(points, function (index, point) {
+        bounds.extend(point['marker'].position);
     });
     map.fitBounds(bounds);
 }
@@ -204,9 +253,9 @@ function autoCenter()
 
 function setAllMap(map)
 {
-    for(var i = 0; i < markers.length;i++)
+    for(var i = 0; i < points.length;i++)
     {
-        markers[i].setMap(map);
+        points[i]['marker'].setMap(map);
     }
 }
 

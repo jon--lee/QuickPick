@@ -1,0 +1,6 @@
+queryKeys = ["panda express", "buffalo wild wings", "mcdonald"]
+queryKeys = ["panda express", "buffalo wild wings", "in n out"]
+queryKeys = ["panda express", "buffalo wild wings"]
+queryKeys = ["panda express", "kinder", "in n out", "safeway"]
+queryKeys = ["panda express", "mcdonald", "in n out", "safeway"]
+queryKeys = ["mcdonald", "in n out", "safeway"]

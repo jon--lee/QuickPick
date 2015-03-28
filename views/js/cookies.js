@@ -41,11 +41,11 @@ function readCookie(name) {
 		var cookie = cookiesArray[i];			//get this cookie in array
 		while (cookie.charAt(0)==' ')			//clear out any whitespace
 		{
-			c = c.substring(1,c.length);
+			cookie = cookie.substring(1,c.length);
 		}
-		if (c.indexOf(nameEQ) == 0)
+		if (cookie.indexOf(nameEQ) == 0)
 		{
-			return c.substring(nameEQ.length,c.length);		//nameEq should be the first part of the string, split that
+			return cookie.substring(nameEQ.length,cookie.length);		//nameEq should be the first part of the string, split that
 															//to find just the value of the key
 		}
 	}

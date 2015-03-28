@@ -10,6 +10,11 @@ from models.node import Node
 from models import ranking
 from models.record import Record
 
+from google.appengine.ext import ndb
+
+MAX_RECOMMENDATIONS = 5
+
+
 class RecommendPage(webapp2.RequestHandler):
     # method: get(self)
     # we don't expect users to reach
@@ -36,9 +41,24 @@ class RecommendPage(webapp2.RequestHandler):
     def post(self):
         req = json.loads(self.request.body)
         references = req["references"]
+        keyString = req["keyString"]
+
+        print "\n\n" + keyString + "\n\n"
+
+        if not keyString == "":
+            print "keyStrng already exists"
+            key = ndb.Key(urlsafe=keyString)
+            rec = key.get()
+        else:
+            print "creating new key string"
+            rec = Record()
+
+        rec.references = json.dumps(references)
+        key = rec.put()
+
+        keyString = key.urlsafe()
 
         base = Node(references)
-
 
         targets = []
         records = Record.query().fetch()
@@ -50,9 +70,12 @@ class RecommendPage(webapp2.RequestHandler):
 
         places = []
 
+        top = MAX_RECOMMENDATIONS
+        if len(results) < top:
+            top = len(results)
 
-
-        for result in results:
+        for i in range(0, top):
+            result = results[i]
             rawData = apiHandler.sendReferenceRequest(result)['result']
             place = {}
 
@@ -78,9 +101,12 @@ class RecommendPage(webapp2.RequestHandler):
             if 'rating' in rawData:
                 place['rating'] = rawData['rating']
 
-            print '\n\n' + place['title'] + '\n\n'
 
             places.append(place)
 
 
-        self.response.out.write(json.dumps(places))
+        response = {
+            'data': places,
+            'keyString': keyString
+        }
+        self.response.out.write(json.dumps(response))
