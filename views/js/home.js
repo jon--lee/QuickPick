@@ -10,6 +10,8 @@ var KEY_STRING_COOKIE_NAME = "ks";
 
 var MAX_WIDTH = 300;
 
+var highlightColor = "#fafafa";
+
 //up(1) and down(0) states of keys
 var keyState = 0;
 
@@ -33,12 +35,18 @@ api for jquery.
 */
 function initialize()
 {
-    var chicago = new google.maps.LatLng(41.850033, -87.6500523);
+    var bayArea = new google.maps.LatLng(37.580298,-122.182079);
     mapOptions =
     {
-        zoom:3,
-        center: chicago,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+        zoom:8,
+        center: bayArea,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        panControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_CENTER
+        },
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_CENTER
+        }
     };
     map = new google.maps.Map(document.getElementById('map-canvas'),
       mapOptions);
@@ -47,18 +55,21 @@ function initialize()
 //initialize the map
 google.maps.event.addDomListener(window, 'load', initialize);
 
+var highlightedIndex = -1;
+var maxHighlightedIndex = -1;
 
-$('#searchBox input').keyup(function(){
+$('#searchBox input').keyup(function(e){
     var val = $(this).val();
-    if(keyState == 1 && lastValue != val)
+    if(keyState == 1 && lastValue != val)       //don't want to search if nothing changed
     {
+        lastValue = val;
         $.ajax({
             type:"post",
             url:"/ajax/autocomplete/",
             dataType:"json",
             data: JSON.stringify({"q": $(this).val()})
         }).done(function(data){
-            $('#autoBox').html("");
+            clearAutocomplete();
             if(data["status"] === "OK")
             {
                 var html = "";
@@ -71,12 +82,24 @@ $('#searchBox input').keyup(function(){
                 }
                 $('#autoBox').html(html);
 
+                if(data['predictions'].length > 0)
+                {
+                    highlightedIndex = 0;
+                    clearAutoCompleteHighlights();
+                    highlight();
+                    maxHighlightedIndex = data['predictions'].length - 1;
+                }
+
 
                 $('#autoBox li').click(function()
                 {
                     createNewSelection($(this).clone());
                 });
-
+                $('#autoBox li').hover(function(){
+                    highlightedIndex = $(this).index();
+                    clearAutoCompleteHighlights();
+                    highlight();
+                });
 
             }
             else
@@ -84,9 +107,78 @@ $('#searchBox input').keyup(function(){
             }
         });
     }
-    lastValue = val;
-    keyState = 0;
+    else
+    {
+        switch(e.keyCode)
+        {
+            case 13:                        //enter key
+                if(highlightedIndex >= 0)
+                {
+
+                    element = $('#autoBox li').eq(highlightedIndex);
+                    createNewSelection(element.clone());
+                }
+            break;
+            case 27:                        //escape key
+                clearAutocomplete();
+            break;
+            case 38:                        //up arrow key
+                if(highlightedIndex > 0)
+                    highlightedIndex--;
+                clearAutoCompleteHighlights();
+                highlight();
+            break;
+            case 40:                        //down arrow key
+                if(highlightedIndex < maxHighlightedIndex)
+                    highlightedIndex++;
+                clearAutoCompleteHighlights();
+                highlight();
+            break;
+        }
+    }
 });
+
+/*
+    method: mouseUp
+    In the event that the user clicks outside of the searchBox
+    or the autoBox then we want to hide the autoBox so that it is out
+    of view and does not interfere with the selection process.
+*/
+$(document).mouseup(function(e){
+
+    var searchBox = $('#searchBox');
+    var autoBox = $('#autoBox');
+
+    if((!searchBox.is(e.target)
+        && searchBox.has(e.target).length === 0)
+        && (!autoBox.is(e.target)
+        && autoBox.has(e.target).length === 0))
+    {
+        clearAutocomplete();
+    }
+
+});
+
+
+function clearAutoCompleteHighlights()
+{
+    $('#autoBox li').each(function(index, element){
+        var element = $('#autoBox li').eq(index);
+        element.css("background-color", "#FFFFFF");
+    });
+}
+
+function highlight()
+{
+    var element = $('#autoBox li').eq(highlightedIndex);
+    element.css('background-color', "blue");
+}
+
+function clearAutocomplete()
+{
+    $('#autoBox').html("");
+    highlightedIndex = -1;
+}
 
 
 /*
@@ -112,7 +204,7 @@ function createNewSelection(listElement)
 
     //get information about the selection
     var reference = listElement.attr("data-reference");
-
+    clearAutocomplete();
     updateRecommendations();
     //center the map on lat and long
 
@@ -136,7 +228,7 @@ var currentWindow = null;
 */
 function updateRecommendations()
 {
-    references = [];
+    var references = [];
     $('#yourPicks ul li').each(function(index, element){
         reference = $(this).attr("data-reference");
         references.push(reference);

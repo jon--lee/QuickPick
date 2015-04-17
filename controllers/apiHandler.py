@@ -10,11 +10,16 @@ ESTABLISHMENT = "establishment"
 REFERENCE_URL = "https://maps.googleapis.com/maps/api/place/details/json?"
 
 
-def sendAutocompleteRequest(q, types):
+def sendAutocompleteRequest(q, types, location, radius):
     print "sending autocmplete request"
     params = {"input": q,
               "types": types,
               "key": API_KEY}
+
+    if((not location == "") and (not radius == "")):
+        params['location'] = location;
+        params['radius'] = radius;
+
     url = AUTOCOMPLETE_URL + urllib.urlencode(params)
 
     response = urllib.urlopen(url)
