@@ -171,7 +171,7 @@ function clearAutoCompleteHighlights()
 function highlight()
 {
     var element = $('#autoBox li').eq(highlightedIndex);
-    element.css('background-color', "blue");
+    element.css('background-color', "#EEEEEE");
 }
 
 function clearAutocomplete()
@@ -199,8 +199,16 @@ function clearAutocomplete()
 */
 function createNewSelection(listElement)
 {
+    listElement.css("background", "white");
+
     // add selection to list of selections
     $('#yourPicks ul').append(listElement);
+
+    //add hover functions to li with x to close
+    $('#yourPicks ul li').hover(function(){
+    },
+    function(){
+    });
 
     //get information about the selection
     var reference = listElement.attr("data-reference");
@@ -211,6 +219,7 @@ function createNewSelection(listElement)
 
     //put marker with details in
 }
+
 
 
 var currentWindow = null;
@@ -247,15 +256,17 @@ function updateRecommendations()
         data: JSON.stringify({"references": references, "keyString": keyString})
     }).done(function(response){
         setAllMap(null);
-        var points = [];
+        //var points = [];
 
         var keyString = response['keyString'];
         createCookie(KEY_STRING_COOKIE_NAME, keyString);
         console.log(keyString);
 
         var data = response['data'];
+
         for (var i = 0; i < data.length; i++)
         {
+            console.log("going through data");
             var place = data[i];
             var title = place['title'];
             var location = new google.maps.LatLng(place['lat'], place['long']);
@@ -325,18 +336,21 @@ function updateRecommendations()
 
 
         }
-        console.log("points: " + points.length);
-        topPoint = points[0];
-        currentWindow = topPoint['infowindow'];
-        currentWindow.open(map,topPoint['marker']);
-        autoCenter();
+
+        if(points.length > 0)
+        {
+            topPoint = points[0];
+            currentWindow = topPoint['infowindow'];
+            currentWindow.open(map,topPoint['marker']);
+            autoCenter(points);
+        }
     });
 }
 
-function autoCenter()
+function autoCenter(pointList)
 {
     var bounds = new google.maps.LatLngBounds();
-    $.each(points, function (index, point) {
+    $.each(pointList, function (index, point) {
         bounds.extend(point['marker'].position);
     });
     map.fitBounds(bounds);

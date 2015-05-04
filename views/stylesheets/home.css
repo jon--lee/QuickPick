@@ -44,7 +44,7 @@ html
     	height:100%;
     	background-size: 100% 100%;
     	background-repeat: no-repeat;
-	background-image: url('../media/banner2.jpg');
+	/*background-image: url('../media/banner2.jpg');*/
 }
 
 #map-container
@@ -148,14 +148,56 @@ html
 	border-top:1px solid #E5E5E5;
 }
 
+#yourPicks
+{
+	background:#F2F2F2;
+	margin-top:40px;
+	min-height:100px;
+	border-radius:4px;
+    color: #919191;
+	padding-top:10px;
+	padding-bottom:10px;
+
+}
+
+#yourPicks span
+{
+	margin-left:20px;
+}
+
 #yourPicks ul
 {
-
+	width:300px;
+	margin-left:-40px;
+	list-style:none;
 }
 
 #yourPicks ul li
 {
+	width:200px;
+	color:white;
 
+	background:#FFFFFF;
+    margin:0px;
+	padding-left:20px;
+	padding-right:20px;
+    width:308px;
+    padding-top:12px;
+    border-bottom:1px solid #E1E1E1;
+    text-overflow: ellipsis;
+	overflow:ellipsis;
+	padding-bottom:12px;
+	font-size:10px;
+    color: #919191;
+    font-weight:normal;
+
+}
+
+#yourPicks ul li b
+{
+		font-size:12px;
+	    color:#000000;
+	    font-weight:bold;
 }
 
 

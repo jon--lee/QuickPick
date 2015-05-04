@@ -45,10 +45,14 @@ class RecommendPage(webapp2.RequestHandler):
 
         print "\n\n" + keyString + "\n\n"
 
+
+
         if not keyString == "":
             print "keyStrng already exists"
             key = ndb.Key(urlsafe=keyString)
             rec = key.get()
+            if rec == None:
+                rec = Record()
         else:
             print "creating new key string"
             rec = Record()
